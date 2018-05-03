@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".WeatherActivity"
+    android:background="#ccc">
+
+
+        <!--<LinearLayout-->
+            <!--android:id="@+id/container_toolbar"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content">-->
+
+            <!--&lt;!&ndash;&lt;!&ndash;TOOLBAR&ndash;&gt;&ndash;&gt;-->
+            <!--&lt;!&ndash;<include&ndash;&gt;-->
+                <!--&lt;!&ndash;android:id="@+id/toolbar"&ndash;&gt;-->
+                <!--&lt;!&ndash;layout="@layout/toolbar" />&ndash;&gt;-->
+
+        <!--</LinearLayout>-->
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/container_body">
+
+            <RelativeLayout
+                android:id="@+id/tempPreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgWeather"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_gravity="top|left"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginTop="40dp"
+                    android:src="@drawable/icon_0" />
+
+                <TextView
+                    android:id="@+id/temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignTop="@+id/imgWeather"
+                    android:layout_marginRight="40dp"
+                    android:layout_marginTop="-15dp"
+                    android:text="XX"
+                    android:textColor="#ffffff"
+                    android:textSize="60sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/lineTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/temp"
+                    android:layout_alignRight="@+id/temp"
+                    android:layout_below="@+id/temp"
+                    android:layout_marginTop="10dp"
+                    android:text="test condition"
+                    android:textAlignment="center"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tempUnit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/temp"
+                    android:layout_marginLeft="-30dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_toRightOf="@id/temp"
+                    android:text="C"
+                    android:textColor="#ffffff"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/txtLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="206dp"
+                    android:text="location"
+                    android:textSize="48sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <!--Current Data Detail-->
+            //TODO: add a background so as the tempDetails feels like it's stick to the bottom
+
+            <LinearLayout
+                android:id="@+id/tempDetails"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/tempDetailBackground"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ffffff"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/currentDetailDataIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/tempIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp" />
+
+                        <ImageView
+                            android:id="@+id/windIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp" />
+
+                        <ImageView
+                            android:id="@+id/humidityIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp" />
+
+                        <ImageView
+                            android:id="@+id/pressureIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp" />
+
+                        <ImageView
+                            android:id="@+id/visibilityIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp" />
+
+                        <ImageView
+                            android:id="@+id/sunIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp" />
+
+                        <ImageView
+                            android:id="@+id/moonIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/currentDetailDataName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tempDetailName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Feel air temperature"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/windDetailName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Wind Speed"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/humidityDetailName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Absolute Humidity"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/pressureDetailName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Pressure"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/visibilityDetailName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Visibility"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/sunriseDetailName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Sunrise"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/sunsetDetailName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Sunset"
+                            android:textColor="#000" />
+
+                    </LinearLayout>
+
+                    <!--Empty View is trying to take the maximum amount of space, leaving room for the Data-->
+                    <!--to make the data align to the right of parent LinearLayout-->
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <LinearLayout
+                        android:id="@+id/currentDetailData"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tempMin"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:text="MI"
+                                android:textColor="#000" />
+
+                            <TextView
+                                android:id="@+id/tempMax"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_marginLeft="10dp"
+                                android:text="MA"
+                                android:textColor="#000" />
+                        </LinearLayout>
+
+
+                        <TextView
+                            android:id="@+id/windDetailData"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="Wi"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/humidityDetailData"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="HU"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/pressureDetailData"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="PR"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/visibilityDetailData"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="VI"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/sunriseDetailData"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="SR"
+                            android:textColor="#000" />
+
+                        <TextView
+                            android:id="@+id/sunsetDetailData"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="SS"
+                            android:textColor="#000" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+
+</android.support.v7.widget.LinearLayoutCompat>
