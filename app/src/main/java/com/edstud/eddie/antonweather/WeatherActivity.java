@@ -11,6 +11,7 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,6 +24,8 @@ import com.edstud.eddie.antonweather.service.WeatherServiceCallback;
 import com.edstud.eddie.antonweather.service.YahooWeatherService;
 
 public class WeatherActivity extends AppCompatActivity implements WeatherServiceCallback, LocationListener {
+
+    private Toolbar toolbar;
 
     private ImageView imgWeather, tempIcon, windIcon, humidityIcon, pressureIcon, visibilityIcon, sunIcon, moonIcon;
     private TextView temp, lineTxt, tempUnit, txtLocation, tempMin, tempMax, windDetailData, humidityDetailData, pressureDetailData,
@@ -44,8 +47,11 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
+        toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+
 //        Today's preview'
-        imgWeather = (ImageView)findViewById(R.id.imgWeather);
+        imgWeather = (ImageView) findViewById(R.id.imgWeather);
         temp = (TextView) findViewById(R.id.temp);
         lineTxt = (TextView) findViewById(R.id.lineTxt);
         tempUnit = (TextView) findViewById(R.id.tempUnit);
@@ -61,7 +67,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         provider = locationManager.getBestProvider(new Criteria(), false);
         //check for permissions:
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             //request permission(s):
             ActivityCompat.requestPermissions(WeatherActivity.this, new String[]{
@@ -89,7 +95,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         //in AVD, change lat and lon and press "SEND"
         super.onResume();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             //request permission(s):
             ActivityCompat.requestPermissions(WeatherActivity.this, new String[]{
@@ -107,15 +113,26 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         dialog.hide();
         Item item = channel.getItem();
 
-        int resourceId = getResources().getIdentifier("drawable/icon_" + item.getCondition().getCode(), null, getPackageName());
+        int code = item.getCondition().getCode();
+        //right now, drawable icons are only 37(icons), so if the code is >37, resources error will appear, so:
+        if (code > 37){
+            code = 0;
+        }
+
+        int resourceId = getResources().getIdentifier("drawable/icon_" + code, null, getPackageName());
+
 
         Drawable weatherIconDrawable = getResources().getDrawable(resourceId);
         imgWeather.setImageDrawable(weatherIconDrawable);
 
-        temp.setText(String.format(String.valueOf(item.getCondition().getTemperature())) );
+        temp.setText(String.format(String.valueOf(item.getCondition().getTemperature())));
         tempUnit.setText("\u00B0" + channel.getUnits().getTemperature());
         lineTxt.setText(String.format(item.getCondition().getDescription()));
-        txtLocation.setText(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
+//        txtLocation.setText(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
+
+
+        toolbar.setTitle(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
+        setToolbarColor(item.getCondition().getTemperature());
     }
 
     @Override
@@ -145,5 +162,35 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+    private void setToolbarColor(int temp) {
+        int color = -1;
+
+        if (temp < -10) {
+            color = getResources().getColor(R.color.primary_indigo);
+        } else if (temp >= -10 && temp <= -5) {
+            color = getResources().getColor(R.color.primary_blue);
+        } else if (temp > -5 && temp < 5) {
+            color = getResources().getColor(R.color.primary_light_blue);
+        } else if (temp >= 5 && temp < 10) {
+            color = getResources().getColor(R.color.primary_teal);
+        } else if (temp >= 10 && temp < 15) {
+            color = getResources().getColor(R.color.primary_light_green);
+        } else if (temp >= 15 && temp < 20) {
+            color = getResources().getColor(R.color.primary_green);
+        } else if (temp >= 20 && temp < 25) {
+            color = getResources().getColor(R.color.primary_lime);
+        } else if (temp >= 25 && temp < 28) {
+            color = getResources().getColor(R.color.primary_yellow);
+        } else if (temp >= 28 && temp < 32) {
+            color = getResources().getColor(R.color.primary_amber);
+        } else if (temp >= 32 && temp < 35) {
+            color = getResources().getColor(R.color.primary_orange);
+        } else if (temp >= 35) {
+            color = getResources().getColor(R.color.primary_red);
+        }
+
+        toolbar.setBackgroundColor(color);
     }
 }

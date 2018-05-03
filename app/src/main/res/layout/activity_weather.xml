@@ -14,12 +14,25 @@
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="wrap_content">-->
 
-            <!--&lt;!&ndash;&lt;!&ndash;TOOLBAR&ndash;&gt;&ndash;&gt;-->
-            <!--&lt;!&ndash;<include&ndash;&gt;-->
-                <!--&lt;!&ndash;android:id="@+id/toolbar"&ndash;&gt;-->
-                <!--&lt;!&ndash;layout="@layout/toolbar" />&ndash;&gt;-->
+            <!--&lt;!&ndash;TOOLBAR&ndash;&gt;-->
+            <!--<include-->
+                <!--android:id="@+id/toolbar"-->
+                <!--layout="@layout/toolbar" />-->
 
         <!--</LinearLayout>-->
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/my_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:background="@color/colorPrimaryDark"
+            android:paddingLeft="72dp"
+            android:paddingBottom="16dp"
+            android:gravity="bottom"
+            android:title="@string/location_placeholder"
+            app:theme="@style/ThemeOverlay.AppCompat.Light"
+            ></android.support.v7.widget.Toolbar>
 
         <FrameLayout
             android:layout_width="fill_parent"
@@ -85,7 +98,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="206dp"
-                    android:text="location"
+                    android:text=""
                     android:textSize="48sp"
                     android:textStyle="bold" />
             </RelativeLayout>

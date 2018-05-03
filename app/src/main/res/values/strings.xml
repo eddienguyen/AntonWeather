@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Anton Weather</string>
 
-
+    <string name="location_placeholder">Finding location</string>
 </resources>
