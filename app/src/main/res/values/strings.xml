@@ -2,4 +2,12 @@
     <string name="app_name">Anton Weather</string>
 
     <string name="location_placeholder">Finding location</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+
+    <!--Menu navigationDrawer item-->
+    <string name="menu_item_find">City Finder</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

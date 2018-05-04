@@ -9,6 +9,9 @@ public class Channel implements JSONPopulator{
     private Units units;
     private Item item;
     private Location location;
+    private Wind wind;
+    private Atmosphere atmosphere;
+    private Astronomy astronomy;
 
     public Units getUnits() {
         return units;
@@ -17,6 +20,12 @@ public class Channel implements JSONPopulator{
     public Item getItem() {return item;}
 
     public Location getLocation() {return location;}
+
+    public Wind getWind() {return wind;}
+
+    public Atmosphere getAtmosphere() {return atmosphere;}
+
+    public Astronomy getAstronomy() {return astronomy;}
 
     @Override
     public void populate(JSONObject data) {
@@ -29,6 +38,15 @@ public class Channel implements JSONPopulator{
 
         location = new Location();
         location.populate(data.optJSONObject("location"));
+
+        wind = new Wind();
+        wind.populate(data.optJSONObject("wind"));
+
+        atmosphere = new Atmosphere();
+        atmosphere.populate(data.optJSONObject("atmosphere"));
+
+        astronomy = new Astronomy();
+        astronomy.populate(data.optJSONObject("astronomy"));
     }
 
 

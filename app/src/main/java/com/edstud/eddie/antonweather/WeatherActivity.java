@@ -3,29 +3,41 @@ package com.edstud.eddie.antonweather;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.edstud.eddie.antonweather.data.Channel;
 import com.edstud.eddie.antonweather.data.Item;
-import com.edstud.eddie.antonweather.data.Location;
 import com.edstud.eddie.antonweather.service.WeatherServiceCallback;
 import com.edstud.eddie.antonweather.service.YahooWeatherService;
 
-public class WeatherActivity extends AppCompatActivity implements WeatherServiceCallback, LocationListener {
+public class WeatherActivity extends AppCompatActivity implements WeatherServiceCallback, LocationListener,
+        NavigationView.OnNavigationItemSelectedListener{
 
-    private Toolbar toolbar;
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
 
     private ImageView imgWeather, tempIcon, windIcon, humidityIcon, pressureIcon, visibilityIcon, sunIcon, moonIcon;
     private TextView temp, lineTxt, tempUnit, txtLocation, tempMin, tempMax, windDetailData, humidityDetailData, pressureDetailData,
@@ -47,8 +59,14 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
-        toolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(toolbar);
+        drawerLayout = (DrawerLayout) findViewById(R.id.activity_main_drawer);
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+
+        setNavigationViewListener();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
 //        Today's preview'
         imgWeather = (ImageView) findViewById(R.id.imgWeather);
@@ -56,6 +74,12 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         lineTxt = (TextView) findViewById(R.id.lineTxt);
         tempUnit = (TextView) findViewById(R.id.tempUnit);
         txtLocation = (TextView) findViewById(R.id.txtLocation);
+        windDetailData = findViewById(R.id.windDetailData);
+        humidityDetailData = findViewById(R.id.humidityDetailData);
+        pressureDetailData = findViewById(R.id.pressureDetailData);
+        visibilityDetailData = findViewById(R.id.visibilityDetailData);
+        sunriseDetailData = findViewById(R.id.sunriseDetailData);
+        sunsetDetailData = findViewById(R.id.sunsetDetailData);
 
         service = new YahooWeatherService(this);
         dialog = new ProgressDialog(this);
@@ -78,16 +102,33 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
             }, MY_PERMISSION);
         }
 
-        android.location.Location location = locationManager.getLastKnownLocation(provider);
-        if (location == null) Log.e("TAG", "NO LOCATION!");
-        else {
-            lat = location.getLatitude();
-            lon = location.getLongitude();
+//        if ( (Intent i = getIntent()) == null) => not get location from cityfinder yet
+                android.location.Location location = locationManager.getLastKnownLocation(provider);
+                if (location == null) Log.e("TAG", "NO LOCATION!");
+                else {
+                    lat = location.getLatitude();
+                    lon = location.getLongitude();
+                }
+
+        //        service.refreshWeather("(21.017929,105.823776)");
+                service.refreshWeather("(" + lat + "," + lon + ")");
+//        else if Intent i = getIntent() != null => this activity just get intent(new location) from cityFinder
+        // lat = i.getExtra(lat)
+        // lon = i.getExtra(lon)
+        //service.refreshWeather(lat + lon)
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (drawerToggle.onOptionsItemSelected(item)){
+            return true;
         }
+        return super.onOptionsItemSelected(item);
+    }
 
-
-//        service.refreshWeather("(21.017929,105.823776)");
-        service.refreshWeather("(" + lat + "," + lon + ")");
+    private void setNavigationViewListener() {
+        NavigationView mNavigationView = (NavigationView) findViewById(R.id.navigation_header_container);
+        mNavigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -128,11 +169,19 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         temp.setText(String.format(String.valueOf(item.getCondition().getTemperature())));
         tempUnit.setText("\u00B0" + channel.getUnits().getTemperature());
         lineTxt.setText(String.format(item.getCondition().getDescription()));
-//        txtLocation.setText(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
+
+        getSupportActionBar().setTitle(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
 
 
-        toolbar.setTitle(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
-        setToolbarColor(item.getCondition().getTemperature());
+        setActionBarColor(item.getCondition().getTemperature());
+
+        windDetailData.setText(String.valueOf(channel.getWind().getSpeed()));
+        humidityDetailData.setText(String.valueOf(channel.getAtmosphere().getHumidity()));
+        pressureDetailData.setText(String.valueOf(channel.getAtmosphere().getPressure()));
+        visibilityDetailData.setText(String.valueOf(channel.getAtmosphere().getVisibility()));
+        sunriseDetailData.setText(channel.getAstronomy().getSunrise());
+        sunsetDetailData.setText(channel.getAstronomy().getSunset());
+
     }
 
     @Override
@@ -164,7 +213,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
     }
 
-    private void setToolbarColor(int temp) {
+    private void setActionBarColor(int temp) {
         int color = -1;
 
         if (temp < -10) {
@@ -191,6 +240,35 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
             color = getResources().getColor(R.color.primary_red);
         }
 
-        toolbar.setBackgroundColor(color);
+        ActionBar bar = getSupportActionBar();
+        bar.setBackgroundDrawable(new ColorDrawable(color));
     }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_find){
+            Intent intent = new Intent(this, CityFinderActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
 }

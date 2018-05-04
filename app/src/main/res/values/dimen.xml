@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Main Activity Components-->
+    <dimen name="navigation_header_height">160dp</dimen>
+</resources>
