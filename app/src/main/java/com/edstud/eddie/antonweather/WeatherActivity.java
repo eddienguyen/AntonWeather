@@ -1,15 +1,14 @@
 package com.edstud.eddie.antonweather;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Criteria;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
@@ -18,30 +17,41 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.edstud.eddie.antonweather.adapter.CustomAdapter;
 import com.edstud.eddie.antonweather.data.Channel;
+import com.edstud.eddie.antonweather.viewadapter.Detail;
+import com.edstud.eddie.antonweather.data.Forecast;
 import com.edstud.eddie.antonweather.data.Item;
 import com.edstud.eddie.antonweather.service.WeatherServiceCallback;
 import com.edstud.eddie.antonweather.service.YahooWeatherService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WeatherActivity extends AppCompatActivity implements WeatherServiceCallback, LocationListener,
-        NavigationView.OnNavigationItemSelectedListener{
+        NavigationView.OnNavigationItemSelectedListener {
+    private List<Object> dataList = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private CustomAdapter mAdapter;
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
 
     private ImageView imgWeather, tempIcon, windIcon, humidityIcon, pressureIcon, visibilityIcon, sunIcon, moonIcon;
-    private TextView temp, lineTxt, tempUnit, txtLocation, tempMin, tempMax, windDetailData, humidityDetailData, pressureDetailData,
-            visibilityDetailData, sunriseDetailData, sunsetDetailData;
+    private TextView temp, txtLocation, lineTxt, tempUnit;
 
     private YahooWeatherService service;
     private ProgressDialog dialog;
@@ -50,14 +60,25 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
     private String provider;
     private double lat, lon;
 
+    Toolbar toolbar;
+
     //add Runtime Permission Request for the app:
-    private static final int MY_PERMISSION = 0;  //requestCode
+    static final int MY_PERMISSION = 0;  //requestCode
 
 
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
+
+        //Today's preview'
+        imgWeather = (ImageView) findViewById(R.id.imgWeather);
+        txtLocation = findViewById(R.id.txtLocation);
+
+//        temp = (TextView) findViewById(R.id.temp);
+//        lineTxt = (TextView) findViewById(R.id.lineTxt);
+//        tempUnit = (TextView) findViewById(R.id.tempUnit);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.activity_main_drawer);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -65,57 +86,60 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
         setNavigationViewListener();
 
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-//        Today's preview'
-        imgWeather = (ImageView) findViewById(R.id.imgWeather);
-        temp = (TextView) findViewById(R.id.temp);
-        lineTxt = (TextView) findViewById(R.id.lineTxt);
-        tempUnit = (TextView) findViewById(R.id.tempUnit);
-        txtLocation = (TextView) findViewById(R.id.txtLocation);
-        windDetailData = findViewById(R.id.windDetailData);
-        humidityDetailData = findViewById(R.id.humidityDetailData);
-        pressureDetailData = findViewById(R.id.pressureDetailData);
-        visibilityDetailData = findViewById(R.id.visibilityDetailData);
-        sunriseDetailData = findViewById(R.id.sunriseDetailData);
-        sunsetDetailData = findViewById(R.id.sunsetDetailData);
+        //recyclerView
+        recyclerView = findViewById(R.id.tempDetails);
+
+        mAdapter = new CustomAdapter(this, dataList);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setHasFixedSize(true);
+        //end recyclerView
+
+        //get Coordinates:
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(WeatherActivity.this, new String[]{
+                    Manifest.permission.INTERNET,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_NETWORK_STATE,
+                    Manifest.permission.SYSTEM_ALERT_WINDOW,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, MY_PERMISSION);
+        }
+        Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+
+        if (location == null){
+            Log.e("TAG", "NO LOCATION!");
+        } else {
+            lat = location.getLatitude();
+            lon = location.getLongitude();
+        }
+
 
         service = new YahooWeatherService(this);
         dialog = new ProgressDialog(this);
         dialog.setMessage("Loading ...");
         dialog.show();
 
-        //get Coordinates:
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        provider = locationManager.getBestProvider(new Criteria(), false);
-        //check for permissions:
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            //request permission(s):
-            ActivityCompat.requestPermissions(WeatherActivity.this, new String[]{
-                    Manifest.permission.INTERNET,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-
-            }, MY_PERMISSION);
-        }
-
-//        if ( (Intent i = getIntent()) == null) => not get location from cityfinder yet
-                android.location.Location location = locationManager.getLastKnownLocation(provider);
-                if (location == null) Log.e("TAG", "NO LOCATION!");
-                else {
-                    lat = location.getLatitude();
-                    lon = location.getLongitude();
-                }
-
-        //        service.refreshWeather("(21.017929,105.823776)");
-                service.refreshWeather("(" + lat + "," + lon + ")");
+//        service.refreshWeather("(21.017929,105.823776)");
+        service.refreshWeather("(" + lat + "," + lon + ")");
 //        else if Intent i = getIntent() != null => this activity just get intent(new location) from cityFinder
         // lat = i.getExtra(lat)
         // lon = i.getExtra(lon)
         //service.refreshWeather(lat + lon)
+
     }
 
     @Override
@@ -146,7 +170,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
             }, MY_PERMISSION);
         }
-        locationManager.requestLocationUpdates(provider, 400, 1, this);
+        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 400, 1, this);
     }
 
     @Override
@@ -155,33 +179,22 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         Item item = channel.getItem();
 
         int code = item.getCondition().getCode();
-        //right now, drawable icons are only 37(icons), so if the code is >37, resources error will appear, so:
-        if (code > 37){
-            code = 0;
-        }
-
         int resourceId = getResources().getIdentifier("drawable/icon_" + code, null, getPackageName());
-
 
         Drawable weatherIconDrawable = getResources().getDrawable(resourceId);
         imgWeather.setImageDrawable(weatherIconDrawable);
+        txtLocation.setText(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
 
-        temp.setText(String.format(String.valueOf(item.getCondition().getTemperature())));
-        tempUnit.setText("\u00B0" + channel.getUnits().getTemperature());
-        lineTxt.setText(String.format(item.getCondition().getDescription()));
+        String title = item.getCondition().getTemperature() + "\u00B0" + channel.getUnits().getTemperature();
+        toolbar.setTitle(title);
 
-        getSupportActionBar().setTitle(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
+        setRootLayoutBackgroundColor(item.getCondition().getTemperature());
 
+//        temp.setText(String.format(String.valueOf(item.getCondition().getTemperature())));
+//        tempUnit.setText("\u00B0" + channel.getUnits().getTemperature());
+//        lineTxt.setText(String.format(item.getCondition().getDescription()));
 
-        setActionBarColor(item.getCondition().getTemperature());
-
-        windDetailData.setText(String.valueOf(channel.getWind().getSpeed()));
-        humidityDetailData.setText(String.valueOf(channel.getAtmosphere().getHumidity()));
-        pressureDetailData.setText(String.valueOf(channel.getAtmosphere().getPressure()));
-        visibilityDetailData.setText(String.valueOf(channel.getAtmosphere().getVisibility()));
-        sunriseDetailData.setText(channel.getAstronomy().getSunrise());
-        sunsetDetailData.setText(channel.getAstronomy().getSunset());
-
+        prepareDataDetailsFromChannel(channel);
     }
 
     @Override
@@ -191,7 +204,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
     }
 
     @Override
-    public void onLocationChanged(android.location.Location location) {
+    public void onLocationChanged(Location location) {
         lat = location.getLatitude();
         lon = location.getLongitude();
 
@@ -213,35 +226,47 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
     }
 
-    private void setActionBarColor(int temp) {
+    private void setRootLayoutBackgroundColor(int temp) {
         int color = -1;
 
         if (temp < -10) {
             color = getResources().getColor(R.color.primary_indigo);
+
         } else if (temp >= -10 && temp <= -5) {
             color = getResources().getColor(R.color.primary_blue);
+
         } else if (temp > -5 && temp < 5) {
             color = getResources().getColor(R.color.primary_light_blue);
+
         } else if (temp >= 5 && temp < 10) {
             color = getResources().getColor(R.color.primary_teal);
+
         } else if (temp >= 10 && temp < 15) {
             color = getResources().getColor(R.color.primary_light_green);
+
         } else if (temp >= 15 && temp < 20) {
             color = getResources().getColor(R.color.primary_green);
+
         } else if (temp >= 20 && temp < 25) {
             color = getResources().getColor(R.color.primary_lime);
+
         } else if (temp >= 25 && temp < 28) {
             color = getResources().getColor(R.color.primary_yellow);
+
         } else if (temp >= 28 && temp < 32) {
             color = getResources().getColor(R.color.primary_amber);
+
         } else if (temp >= 32 && temp < 35) {
             color = getResources().getColor(R.color.primary_orange);
+
         } else if (temp >= 35) {
             color = getResources().getColor(R.color.primary_red);
+
         }
 
-        ActionBar bar = getSupportActionBar();
-        bar.setBackgroundDrawable(new ColorDrawable(color));
+        drawerLayout.setBackgroundColor(color);
+//        toolbar.setBackgroundColor(color);
+
     }
 
     @Override
@@ -254,6 +279,37 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    //prepare data for recyclerView
+    public void prepareDataDetailsFromChannel(Channel channel){
+        dataList.clear();
+
+        Detail detail = new Detail(
+                String.valueOf(channel.getWind().getSpeed() + " " + channel.getUnits().getSpeed()),
+                String.valueOf(channel.getAtmosphere().getHumidity() + " %" ),
+                String.valueOf(channel.getAtmosphere().getPressure() + " " + channel.getUnits().getPressure()),
+                String.valueOf(channel.getAtmosphere().getVisibility()),
+                channel.getAstronomy().getSunrise(),
+                channel.getAstronomy().getSunset()
+        );
+        dataList.add(detail);
+
+        //TODO: forecast
+
+        Forecast[] forecasts = channel.getItem().getForecast();
+        for (Forecast forecast : forecasts){
+            dataList.add(new com.edstud.eddie.antonweather.viewadapter.Forecast(
+                    forecast.getDay(),
+                    forecast.getDate(),
+                    forecast.getText(),
+                    forecast.getHigh(),
+                    forecast.getLow(),
+                    forecast.getCode()
+            ));
+        }
+
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

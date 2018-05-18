@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Anton Weather</string>
 
@@ -10,4 +11,5 @@
     <!--Menu navigationDrawer item-->
     <string name="menu_item_find">City Finder</string>
     <string name="title_activity_maps">Map</string>
+
 </resources>

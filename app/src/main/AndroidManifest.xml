@@ -22,6 +22,10 @@
         </activity>
         <activity android:name=".CityFinderActivity" />
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCxoW6UMDqfULj7x47S27VCVNUqWvitJ2Y"/>
+
 
     </application>
 

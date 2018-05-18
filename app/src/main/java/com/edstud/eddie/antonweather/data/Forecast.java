@@ -30,4 +30,16 @@ public class Forecast implements JSONPopulator{
         low = data.optInt("low");
         text = data.optString("text");
     }
+
+    @Override
+    public String toString() {
+        return "Forecast{" +
+                "code=" + code +
+                ", date='" + date + '\'' +
+                ", day='" + day + '\'' +
+                ", high=" + high +
+                ", low=" + low +
+                ", text='" + text + '\'' +
+                '}';
+    }
 }
