@@ -23,25 +23,27 @@
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@null"
+            android:layout_height="300dp"
             android:orientation="vertical"
-            app:elevation="0dp">
-
-
+            app:elevation="0dp"
+            android:background="@null">
 
             <android.support.design.widget.CollapsingToolbarLayout
                 android:id="@+id/main.collapsing"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:expandedTitleMarginStart="@dimen/recycler_view_padding_horizontal"
-                app:collapsedTitleGravity="center"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed">
+                app:expandedTitleMarginStart="@dimen/toolbarlayout_margin_horizontal"
+                app:expandedTitleMarginEnd="64dp"
+                app:layout_scrollFlags="exitUntilCollapsed|scroll"
+                app:expandedTitleGravity="bottom|center_horizontal"
+                app:contentScrim="?attr/colorPrimary"
+                app:title="location"> <!--change background here-->
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                     android:gravity="center"
                     style="@style/Widget.MyApp.Toolbar.Solid"
                     app:layout_collapseMode="pin"
@@ -50,10 +52,10 @@
                 </android.support.v7.widget.Toolbar>
 
                 <TextView
-                    android:id="@+id/txtLocation"
+                    android:id="@+id/txtAppName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Location"
+                    android:text="@string/app_name"
                     android:textSize="@dimen/event_title_text_size"
                     android:textColor="@color/toolbarTextColor"
                     android:paddingTop="@dimen/recycler_view_padding_vertical"
@@ -61,78 +63,99 @@
                     android:gravity="center"
                     app:layout_collapseMode="parallax"/>
 
-                <ImageView
-                    android:id="@+id/imgWeather"
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:layout_gravity="center_vertical|end"
-                    android:layout_marginRight="@dimen/recycler_view_padding_horizontal"
-                    android:layout_marginTop="@dimen/recycler_view_padding_vertical"
-                    android:src="@drawable/icon_0"
-                    app:layout_collapseMode="parallax" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_collapseMode="none"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/txtTemp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
+                            android:layout_weight="2"
+                            android:gravity="bottom"
+                            android:layout_marginLeft="@dimen/recycler_view_padding_horizontal"
+                            android:text="XX"
+                            android:textColor="#ffffff"
+                            android:textSize="60sp"
+                            android:textStyle="bold"
+                            app:layout_collapseMode="none"/>
+
+                        <TextView
+                            android:id="@+id/txtCondition"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:gravity="top"
+                            android:layout_marginLeft="@dimen/recycler_view_padding_horizontal"
+                            android:text="test condition"
+                            android:textAlignment="center"
+                            android:textColor="#ffffff"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tempUnit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="start|center_vertical"
+                        android:text="C"
+                        android:textColor="#ffffff"
+                        android:textSize="20sp"
+                        app:layout_collapseMode="none" />
 
 
 
-                <!--<TextView-->
-                <!--android:id="@+id/temp"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_alignParentRight="true"-->
-                <!--android:layout_alignTop="@+id/imgWeather"-->
-                <!--android:layout_marginRight="40dp"-->
-                <!--android:layout_marginTop="-15dp"-->
-                <!--android:text="XX"-->
-                <!--android:textColor="#ffffff"-->
-                <!--android:textSize="60sp"-->
-                <!--android:textStyle="bold" />-->
+                    <ImageView
+                        android:id="@+id/imgWeather"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="72dp"
+                        android:layout_gravity="center_vertical|end"
+                        android:layout_marginRight="@dimen/recycler_view_padding_horizontal"
+                        android:layout_marginTop="@dimen/recycler_view_padding_vertical"
+                        android:src="@drawable/icon_0"/>
 
-                <!--<TextView-->
-                <!--android:id="@+id/lineTxt"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_alignLeft="@+id/temp"-->
-                <!--android:layout_alignRight="@+id/temp"-->
-                <!--android:layout_below="@+id/temp"-->
-                <!--android:layout_marginTop="10dp"-->
-                <!--android:text="test condition"-->
-                <!--android:textAlignment="center"-->
-                <!--android:textColor="#ffffff"-->
-                <!--android:textSize="12sp" />-->
 
-                <!--<TextView-->
-                <!--android:id="@+id/tempUnit"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_alignTop="@id/temp"-->
-                <!--android:layout_marginLeft="-30dp"-->
-                <!--android:layout_marginTop="20dp"-->
-                <!--android:layout_toRightOf="@id/temp"-->
-                <!--android:text="C"-->
-                <!--android:textColor="#ffffff"-->
-                <!--android:textSize="20sp"/>-->
+                </LinearLayout>
 
             </android.support.design.widget.CollapsingToolbarLayout>
 
         </android.support.design.widget.AppBarLayout>
 
-        <!--Current Data Detail-->
-        //TODO: add a background so as the tempDetails feels like it's stick to the bottom
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/tempDetails"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:background="@null"
-            android:orientation="horizontal"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:paddingTop="@dimen/recycler_view_padding_vertical"
-            android:paddingBottom="@dimen/recycler_view_padding_vertical"
-            android:paddingLeft="@dimen/recycler_view_padding_horizontal"
-            android:paddingRight="@dimen/recycler_view_padding_horizontal">
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        </android.support.v7.widget.RecyclerView>
+            <!--Current Data Detail-->
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/tempDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:background="@null"
+                android:orientation="horizontal"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:paddingTop="@dimen/recycler_view_padding_vertical"
+                android:paddingBottom="@dimen/recycler_view_padding_vertical"
+                android:paddingLeft="@dimen/recycler_view_padding_horizontal"
+                android:paddingRight="@dimen/recycler_view_padding_horizontal">
 
+            </android.support.v7.widget.RecyclerView>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
 
     </android.support.design.widget.CoordinatorLayout>

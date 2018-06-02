@@ -13,10 +13,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -47,11 +49,14 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
     private RecyclerView recyclerView;
     private CustomAdapter mAdapter;
 
+    private SwipeRefreshLayout swipeRefreshLayout;
+
+    private CollapsingToolbarLayout collapsingToolbarLayout;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
 
-    private ImageView imgWeather, tempIcon, windIcon, humidityIcon, pressureIcon, visibilityIcon, sunIcon, moonIcon;
-    private TextView temp, txtLocation, lineTxt, tempUnit;
+    private ImageView imgWeather;
+    private TextView txtAppName, txtTemp, txtCondition, tempUnit;
 
     private YahooWeatherService service;
     private ProgressDialog dialog;
@@ -65,6 +70,8 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
     //add Runtime Permission Request for the app:
     static final int MY_PERMISSION = 0;  //requestCode
 
+    //Request code for calling cityFinder Activity
+    public static final int CITYFINDER_ACTIVITY_REQUEST = 100;
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -72,18 +79,21 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+
         //Today's preview'
         imgWeather = (ImageView) findViewById(R.id.imgWeather);
-        txtLocation = findViewById(R.id.txtLocation);
-
-//        temp = (TextView) findViewById(R.id.temp);
-//        lineTxt = (TextView) findViewById(R.id.lineTxt);
-//        tempUnit = (TextView) findViewById(R.id.tempUnit);
+        txtAppName = findViewById(R.id.txtAppName);
+        txtTemp = findViewById(R.id.txtTemp);
+        txtCondition = findViewById(R.id.txtCondition);
+        tempUnit = findViewById(R.id.tempUnit);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.activity_main_drawer);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(drawerToggle);
 
+        collapsingToolbarLayout = findViewById(R.id.main_collapsing);
         setNavigationViewListener();
 
         toolbar = findViewById(R.id.toolbar);
@@ -92,6 +102,16 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        //swipeRefresh
+        swipeRefreshLayout.setColorSchemeResources(R.color.primary_green, R.color.primary_red, R.color.primary_yellow);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                service.refreshWeather("(" + lat + "," + lon + ")");
+
+            }
+        });
 
         //recyclerView
         recyclerView = findViewById(R.id.tempDetails);
@@ -117,6 +137,12 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
             }, MY_PERMISSION);
         }
+
+        service = new YahooWeatherService(this);
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Loading ...");
+        dialog.show();
+
         Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
 
         if (location == null){
@@ -125,20 +151,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
             lat = location.getLatitude();
             lon = location.getLongitude();
         }
-
-
-        service = new YahooWeatherService(this);
-        dialog = new ProgressDialog(this);
-        dialog.setMessage("Loading ...");
-        dialog.show();
-
-
-//        service.refreshWeather("(21.017929,105.823776)");
         service.refreshWeather("(" + lat + "," + lon + ")");
-//        else if Intent i = getIntent() != null => this activity just get intent(new location) from cityFinder
-        // lat = i.getExtra(lat)
-        // lon = i.getExtra(lon)
-        //service.refreshWeather(lat + lon)
 
     }
 
@@ -157,7 +170,6 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
     @Override
     protected void onResume() {
-        //in AVD, change lat and lon and press "SEND"
         super.onResume();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -170,12 +182,14 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
             }, MY_PERMISSION);
         }
+
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 400, 1, this);
     }
 
     @Override
     public void serviceSuccess(Channel channel) {
         dialog.hide();
+        swipeRefreshLayout.setRefreshing(false);
         Item item = channel.getItem();
 
         int code = item.getCondition().getCode();
@@ -183,16 +197,15 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
         Drawable weatherIconDrawable = getResources().getDrawable(resourceId);
         imgWeather.setImageDrawable(weatherIconDrawable);
-        txtLocation.setText(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
 
-        String title = item.getCondition().getTemperature() + "\u00B0" + channel.getUnits().getTemperature();
-        toolbar.setTitle(title);
+        collapsingToolbarLayout.setTitle(channel.getLocation().getCity() + ", " + channel.getLocation().getCountry());
+;
+
+        txtTemp.setText(String.valueOf(item.getCondition().getTemperature()));
+        tempUnit.setText(String.format("\u00B0" + channel.getUnits().getTemperature()));
+        txtCondition.setText(String.format(item.getCondition().getDescription()));
 
         setRootLayoutBackgroundColor(item.getCondition().getTemperature());
-
-//        temp.setText(String.format(String.valueOf(item.getCondition().getTemperature())));
-//        tempUnit.setText("\u00B0" + channel.getUnits().getTemperature());
-//        lineTxt.setText(String.format(item.getCondition().getDescription()));
 
         prepareDataDetailsFromChannel(channel);
     }
@@ -265,7 +278,6 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         }
 
         drawerLayout.setBackgroundColor(color);
-//        toolbar.setBackgroundColor(color);
 
     }
 
@@ -295,8 +307,6 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
         );
         dataList.add(detail);
 
-        //TODO: forecast
-
         Forecast[] forecasts = channel.getItem().getForecast();
         for (Forecast forecast : forecasts){
             dataList.add(new com.edstud.eddie.antonweather.viewadapter.Forecast(
@@ -318,13 +328,32 @@ public class WeatherActivity extends AppCompatActivity implements WeatherService
 
         if (id == R.id.action_find){
             Intent intent = new Intent(this, CityFinderActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, CITYFINDER_ACTIVITY_REQUEST);
             return true;
         }
-
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        //check if this is back from CityFinderActivity
+        if (requestCode == CITYFINDER_ACTIVITY_REQUEST){
+            //and all went fine
+            if (resultCode == RESULT_OK){
+                //if intent is not null
+                if (data != null){
+                    //get bundle from key "latLngBundle"
+                    Bundle packageFromCaller = data.getBundleExtra("latLngBundle");
+                    //get data from bundle
+                    lat = packageFromCaller.getDouble("latitude");
+                    lon = packageFromCaller.getDouble("longitude");
+                    service.refreshWeather("(" + lat + "," + lon + ")");
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                }
+            }
+        }
+    }
 }
